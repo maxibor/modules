@@ -99,7 +99,7 @@ bismark_summary:
 blast_blastn:
   - software/blast/blastn/**
   - tests/software/blast/blastn/**
-  
+
 blast_makeblastdb:
   - software/blast/makeblastdb/**
   - tests/software/blast/makeblastdb/**
@@ -157,6 +157,10 @@ cnvkit:
 cutadapt:
   - software/cutadapt/**
   - tests/software/cutadapt/**
+
+damageprofiler:
+  - software/damageprofiler/**
+  - tests/software/damageprofiler/**
 
 dsh_filterbed:
   - software/dsh/filterbed/**
@@ -315,13 +319,13 @@ samtools_index:
   - software/samtools/index/**
   - tests/software/samtools/index/**
 
-samtools_mpileup:
-  - software/samtools/mpileup/**
-  - tests/software/samtools/mpileup/**
-
 samtools_merge:
   - software/samtools/merge/**
   - tests/software/samtools/merge/**
+
+samtools_mpileup:
+  - software/samtools/mpileup/**
+  - tests/software/samtools/mpileup/**
 
 samtools_sort:
   - software/samtools/sort/**
