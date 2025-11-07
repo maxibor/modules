@@ -19,12 +19,12 @@
         "timestamp": "2024-12-02T12:56:09.941793"
     },
     "trimgalore_test_pe_reads_2_lines": {
-        "content": "eccf3e9e74589ff01c77fce7f4548e41",
+        "content": "d019f21d7ea965ea1b91b6969654be0e",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.2"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2024-12-02T12:56:34.948679"
+        "timestamp": "2025-11-07T16:53:50.400661"
     },
     "fastp_test_pe_reads_1_size": {
         "content": [
@@ -55,12 +55,12 @@
         "timestamp": "2024-12-02T12:56:34.952929"
     },
     "trimgalore_test_pe_reads_1_lines": {
-        "content": "3868fc1caf09367141d2bbf47e158823",
+        "content": "ce9c6e1cdf08c33888002ff78ca7c037",
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "24.10.2"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.0"
         },
-        "timestamp": "2024-12-02T12:56:34.913312"
+        "timestamp": "2025-11-07T16:53:50.35458"
     },
     "fastp_lint": {
         "content": "daec499818124330ef90e5af47383f00",

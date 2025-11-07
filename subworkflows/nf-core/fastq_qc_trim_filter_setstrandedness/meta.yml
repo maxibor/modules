@@ -126,7 +126,7 @@ input:
       description: Save the trimmed FastQ files in the results directory?
   - remove_ribo_rna:
       type: boolean
-      description: Enable the removal of reads derived from ribosomal RNA using SortMeRNA?
+      description: Enable the removal of reads derived from ribosomal RNA using SortMeRNA or RiboDetector
   - with_umi:
       type: boolean
       description: Enable UMI-based read deduplication
@@ -147,6 +147,12 @@ input:
       type: boolean
       description: |
         For FASTP, save merged fastqs stitching together read1 and read2 for paired end reads
+  - rrna_rm_tool:
+      type: string
+      description: Specifies the tool to use for rRNA removal - available options are 'sortmerna' and 'ribodector'
+  - read_length:
+      type: integer
+      description: Read length to use for RiboDetector (only required if rrna_rm_tool is set to 'ribodector')
 
 output:
   - reads:

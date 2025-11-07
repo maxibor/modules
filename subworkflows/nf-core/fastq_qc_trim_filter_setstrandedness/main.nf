@@ -2,10 +2,11 @@ include { BBMAP_BBSPLIT                      } from '../../../modules/nf-core/bb
 include { CAT_FASTQ                          } from '../../../modules/nf-core/cat/fastq/main'
 include { SORTMERNA                          } from '../../../modules/nf-core/sortmerna/main'
 include { SORTMERNA as SORTMERNA_INDEX       } from '../../../modules/nf-core/sortmerna/main'
+include { RIBODETECTOR                       } from '../../../modules/nf-core/ribodetector/main'
 include { FQ_LINT                            } from '../../../modules/nf-core/fq/lint/main'
 include { FQ_LINT as FQ_LINT_AFTER_TRIMMING  } from '../../../modules/nf-core/fq/lint/main'
 include { FQ_LINT as FQ_LINT_AFTER_BBSPLIT   } from '../../../modules/nf-core/fq/lint/main'
-include { FQ_LINT as FQ_LINT_AFTER_SORTMERNA } from '../../../modules/nf-core/fq/lint/main'
+include { FQ_LINT as FQ_LINT_AFTER_RRNA_RM   } from '../../../modules/nf-core/fq/lint/main'
 
 include { FASTQ_SUBSAMPLE_FQ_SALMON          } from '../fastq_subsample_fq_salmon'
 include { FASTQ_FASTQC_UMITOOLS_TRIMGALORE   } from '../fastq_fastqc_umitools_trimgalore'
@@ -109,6 +110,8 @@ workflow FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS {
     unstranded_threshold // float: The difference in fraction of stranded reads assigned to 'forward' and 'reverse' below which a sample is classified as 'unstranded'
     skip_linting         // boolean: true/false
     fastp_merge          // boolean: true/false: whether to stitch paired end reads together in FASTP output
+    rrna_rm_tool         // string (enum): 'sortmerna' or 'ribodector'
+    read_length          // integer: Read length to use for RiboDetector (only required if rrna_rm_tool is set to 'ribodector')
 
     main:
 
@@ -259,37 +262,50 @@ workflow FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS {
     // MODULE: Remove ribosomal RNA reads
     //
     if (remove_ribo_rna) {
-        ch_sortmerna_fastas = ch_rrna_fastas
+        if (rrna_rm_tool == 'sortmerna') {
+            ch_sortmerna_fastas = ch_rrna_fastas
             .collect()
             .map { ['rrna_refs', it] }
 
-        if (make_sortmerna_index) {
-            SORTMERNA_INDEX(
-                [[], []],
+            if (make_sortmerna_index) {
+                SORTMERNA_INDEX(
+                    [[], []],
+                    ch_sortmerna_fastas,
+                    [[], []],
+                )
+                ch_sortmerna_index = SORTMERNA_INDEX.out.index.first()
+            }
+
+            SORTMERNA(
+                ch_filtered_reads,
                 ch_sortmerna_fastas,
-                [[], []],
+                ch_sortmerna_index,
             )
-            ch_sortmerna_index = SORTMERNA_INDEX.out.index.first()
+
+            SORTMERNA.out.reads.set { ch_filtered_reads }
+
+            ch_multiqc_files = ch_multiqc_files.mix(SORTMERNA.out.log)
+
+            ch_versions = ch_versions.mix(SORTMERNA.out.versions.first())
+        } else if (rrna_rm_tool == 'ribodector') {
+            RIBODETECTOR(
+                ch_filtered_reads,
+                read_length
+            )
+            RIBODETECTOR.out.fastq.set { ch_filtered_reads }
+
+            ch_multiqc_files = ch_multiqc_files.mix(RIBODETECTOR.out.log)
+
+            ch_versions = ch_versions.mix(RIBODETECTOR.out.versions.first())
         }
-
-        SORTMERNA(
-            ch_filtered_reads,
-            ch_sortmerna_fastas,
-            ch_sortmerna_index,
-        )
-
-        SORTMERNA.out.reads.set { ch_filtered_reads }
-
-        ch_multiqc_files = ch_multiqc_files.mix(SORTMERNA.out.log)
-
-        ch_versions = ch_versions.mix(SORTMERNA.out.versions.first())
+        
 
         if (!skip_linting) {
-            FQ_LINT_AFTER_SORTMERNA(
+            FQ_LINT_AFTER_RRNA_RM(
                 ch_filtered_reads
             )
-            ch_lint_log = ch_lint_log.mix(FQ_LINT_AFTER_SORTMERNA.out.lint)
-            ch_filtered_reads = ch_filtered_reads.join(FQ_LINT_AFTER_SORTMERNA.out.lint.map { it[0] })
+            ch_lint_log = ch_lint_log.mix(FQ_LINT_AFTER_RRNA_RM.out.lint)
+            ch_filtered_reads = ch_filtered_reads.join(FQ_LINT_AFTER_RRNA_RM.out.lint.map { it[0] })
         }
     }
 
